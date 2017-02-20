@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:DiceRollerMobile"
+             x:Class="DiceRollerMobile.Views.MainPage">
+
+  <StackLayout Orientation="Vertical">
+    <Button x:Name="historyBtn" Text="History" HorizontalOptions="End" Clicked="HistoryBtn_OnClicked"></Button>
+    <StackLayout x:Name="dices" Orientation="Vertical" VerticalOptions = "CenterAndExpand" HorizontalOptions = "CenterAndExpand">
+      <!--<Label x:Name="dice1" HorizontalOptions="CenterAndExpand">Dice1</Label>
+      <Label x:Name="dice2" HorizontalOptions="CenterAndExpand">Dice2</Label>
+      <Label x:Name="dice3" HorizontalOptions="CenterAndExpand">Dice3</Label>-->
+    </StackLayout>
+    <Stepper x:Name="diceAmountPicker" HorizontalOptions="CenterAndExpand" Increment="1" Minimum="1" Maximum="6"></Stepper>
+    <Button x:Name="rollBtn" HorizontalOptions="CenterAndExpand" Text="Roll" Clicked="RollDices"></Button>
+  </StackLayout>
+</ContentPage>
