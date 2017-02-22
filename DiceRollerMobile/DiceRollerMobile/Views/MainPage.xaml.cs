@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using DiceRollerMobile.Models;
 using Xamarin.Forms;
 
 namespace DiceRollerMobile.Views
 {
     public partial class MainPage : ContentPage
     {
-        private List<Label> _dices = new List<Label>();
-        public int _diceMin { get; set; } = 1;
-        public int _diceMax { get; set; } = 6;
+        //private List<Dice> _dices = new List<Dice>();
+        public List<Roll> Rolls { get; set; } = new List<Roll>();
+
         public MainPage()
         {
             InitializeComponent();
@@ -16,57 +18,58 @@ namespace DiceRollerMobile.Views
             InitDefaultDices();
         }
 
+        //This method creates the inital default dices to be used when the game starts and visualizes them.
         private void InitDefaultDices()
         {
-            dices.Children.Add(GetDice());
+            dices.Children.Add(VisualizeDice(GetDice()));
         }
 
+        //This method returns a label with properties based on the given dice
+        private Label VisualizeDice(Dice dice)
+        {
+            if (dice.Val == null)
+            return new Label() {Text = $"({dice.MinVal},{dice.MaxVal})"};
+            return new Label() {Text = dice.Val.ToString()};
+        }
+
+        //This method listens for changes on no. dices and sets corresponding dices.
         private void AddStepperListener()
         {
             diceAmountPicker.ValueChanged += SetDices;
         }
 
+        //This method clears all dices from stacklayout and list of dices and adds new no. of dices
         private void SetDices(object sender, ValueChangedEventArgs valueChangedEventArgs)
         {
             dices.Children.Clear();
-            _dices.Clear();
-            GetLayoutForDices((int)diceAmountPicker.Value);
+            //_dices.Clear();
+
+            GetLayoutForDices(CreateDices((int)diceAmountPicker.Value));
         }
 
-        private void GetLayoutForDices(int dices)
+        private void GetLayoutForDices(List<Dice> rolledDices)
         {
-            if (dices < 3)
+            if (rolledDices.Count < 3)
             {
                 var diceRow = GetStackLayout();
-                for (int i = 0; i < dices; i++)
+                for (int i = 0; i < rolledDices.Count; i++)
                 {
-                    diceRow.Children.Add(GetDice());
+                    diceRow.Children.Add(VisualizeDice(rolledDices[i]));
                 }
                 this.dices.Children.Add(diceRow);
             }
-            //else if (dices == 4)
-            //{
-            //    var diceRow1 = GetStackLayout();
-            //    var diceRow2 = GetStackLayout();
-            //    for (int i = 0; i < dices/2; i++)
-            //    {
-            //        diceRow1.Children.Add(GetDice());
-            //        diceRow2.Children.Add(GetDice());
-            //    }
-            //    this.dices.Children.Add(GetStackLayout());
-            //}
             else
             {
                 var diceRow1 = GetStackLayout();
                 var diceRow2 = GetStackLayout();
-                for (int i = 0; i < dices/2; i++)
+                for (int i = 0; i < rolledDices.Count-1;)
                 {
-                    diceRow1.Children.Add(GetDice());
-                    diceRow2.Children.Add(GetDice());
+                    diceRow1.Children.Add(VisualizeDice(rolledDices[i++]));
+                    diceRow2.Children.Add(VisualizeDice(rolledDices[i++]));
                 }
-                for (int i = 0; i < dices % 2; i++)
+                for (int i = 0; i < rolledDices.Count % 2; i++)
                 {
-                    diceRow1.Children.Add(GetDice());
+                    diceRow1.Children.Add(VisualizeDice(rolledDices[i]));
                 }
                 this.dices.Children.Add(diceRow1);
                 this.dices.Children.Add(diceRow2);
@@ -83,25 +86,35 @@ namespace DiceRollerMobile.Views
             };
         }
 
-        private Label GetDice()
+        private List<Dice> CreateDices(int count)
         {
-            Label dice = new Label() {Text = "1-6"};
-            _dices.Add(dice);
+            //_dices.Clear();
+            var dices = new List<Dice>();
+            for (int i = 0; i < count; i++)
+            {
+                dices.Add(GetDice());
+            }
+            return dices;
+        }
+
+        private Dice GetDice()
+        {
+            Dice dice = new Dice();
+            //_dices.Add(dice);
             return dice;
         }
 
         private void RollDices(object sender, EventArgs e)
         {
-            Random random = new Random();
-            foreach (var dice in _dices)
-            {
-                dice.Text = random.Next(_diceMin, _diceMax+1).ToString();
-            }
+            var roll = new Roll(CreateDices((int)diceAmountPicker.Value));
+            dices.Children.Clear();
+            GetLayoutForDices(roll.Dices);
+            Rolls.Add(roll);
         }
 
         private async void HistoryBtn_OnClicked(object sender, EventArgs e)
         {
-            await Navigation.PushAsync(new HistoryPage());
+            await Navigation.PushAsync(new HistoryPage(Rolls));
         }
     }
 }
